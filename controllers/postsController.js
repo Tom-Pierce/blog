@@ -31,6 +31,9 @@ exports.posts_post = [
   body("published").trim().isBoolean().escape(),
 
   async (req, res, next) => {
+    if (!req.user.isAdmin) {
+      res.sendStatus(403);
+    }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -45,9 +48,21 @@ exports.posts_post = [
         isPublished: req.body.published,
       });
       post.save();
-      res.json({ message: "Post created" });
+      res.status(200).json({ message: "Post created" });
     } catch (error) {
       console.log(error);
     }
   },
 ];
+
+// Get specific post
+exports.post_get = async (req, res, next) => {
+  const post = await Post.findById(req.params.id)
+    .populate("author", "username")
+    .exec();
+  if (post.isPublished) {
+    res.json(post);
+  } else {
+    res.status(404).json({ message: "Post not found" });
+  }
+};

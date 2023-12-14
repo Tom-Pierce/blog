@@ -77,13 +77,8 @@ exports.log_in = [
     session: false,
   }),
   async (req, res, next) => {
-    jwt.sign(
-      { user: req.user },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" },
-      (err, token) => {
-        res.json({ token });
-      }
-    );
+    jwt.sign({ user: req.user }, process.env.JWT_SECRET, (err, token) => {
+      res.json({ token });
+    });
   },
 ];

@@ -10,6 +10,7 @@ const apiV1Router = require("./routes/api.v1");
 const User = require("./models/user");
 
 const mongoose = require("mongoose");
+const verifyToken = require("./helpers/verifyToken");
 
 mongoose.set("strictQuery", false);
 const mongoDB = process.env.MONGODB_URI;
@@ -57,6 +58,7 @@ app.use(passport.initialize());
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(verifyToken);
 
 app.use("/api/v1", apiV1Router);
 
