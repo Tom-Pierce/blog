@@ -49,19 +49,22 @@ exports.sign_up = [
         errors: errors.array(),
       });
     }
+
     // Hash password and create user
     try {
       bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
         if (err) {
           return err;
         }
+
         const user = new User({
           username: req.body.username,
           email: req.body.email,
           password: hashedPassword,
         });
+
         await user.save();
-        res.status(200).json({
+        return res.status(201).json({
           message: "User created succesfully",
         });
       });

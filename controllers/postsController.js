@@ -32,7 +32,7 @@ exports.posts_post = [
 
   async (req, res, next) => {
     if (!req.user.isAdmin) {
-      res.sendStatus(403);
+      return res.status(403).json({ error: "Must be admin to create a post" });
     }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -48,9 +48,9 @@ exports.posts_post = [
         isPublished: req.body.published,
       });
       post.save();
-      res.status(200).json({ message: "Post created" });
+      return res.status(201).json({ message: "Post created" });
     } catch (error) {
-      console.log(error);
+      console.log({ error });
     }
   },
 ];

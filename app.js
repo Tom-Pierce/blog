@@ -13,7 +13,10 @@ const mongoose = require("mongoose");
 const verifyToken = require("./helpers/verifyToken");
 
 mongoose.set("strictQuery", false);
-const mongoDB = process.env.MONGODB_URI;
+
+// Connect to local database for testing if in test environment
+const mongoDB =
+  process.env.NODE_ENV === "test" ? undefined : process.env.MONGODB_URI;
 
 main().catch((err) => console.log(err));
 async function main() {

@@ -3,7 +3,7 @@ require("dotenv").config();
 
 // Verify token and set req.user
 const verifyToken = (req, res, next) => {
-  const bearerHeader = req.headers["authorization"];
+  const bearerHeader = req.headers.authorization;
   if (!bearerHeader) {
     req.user = { guest: true };
     return next();
@@ -19,7 +19,6 @@ const verifyToken = (req, res, next) => {
     }
     return next();
   });
-  return next();
 };
 
 module.exports = verifyToken;
