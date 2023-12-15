@@ -1,8 +1,11 @@
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 const app = require("../app");
-const User = require("../models/user");
 const jwt = require("jsonwebtoken");
+
+const User = require("../models/user");
+const Post = require("../models/post");
+const Comment = require("../models/comment");
 
 chai.use(chaiHttp);
 const expect = chai.expect;
@@ -10,6 +13,13 @@ const expect = chai.expect;
 let JWT;
 
 describe("Sign up authentication tests", () => {
+  before(async () => {
+    // clear database from previous tests
+    await User.deleteMany({}).exec();
+    await Post.deleteMany({}).exec();
+    await Comment.deleteMany({}).exec();
+  });
+
   it("should create a new user", async () => {
     const res = await chai.request(app).post("/api/v1/signup").send({
       email: "admin@gmail.com",
