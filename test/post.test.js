@@ -1,37 +1,30 @@
 const chai = require("chai");
 const chaiHttp = require("chai-http");
-const { MongoMemoryServer } = require("mongodb-memory-server");
-const mongoose = require("mongoose");
 const app = require("../app");
-
-const User = require("../models/user");
 
 chai.use(chaiHttp);
 const expect = chai.expect;
 
-let mongoServer;
-let JWT;
-mongoose.set("strictQuery", false);
-
-before(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  mongoose.connect(mongoUri);
-});
-
-after(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
-
 describe("Post tests", () => {
-  it("should get a token", async () => {
-    const res = await chai.request(app).post("/api/v1/login").send({
-      email: "admin@gmail.com",
-      password: "Password123",
-    });
-    expect(res.body).to.have.an("object").with.property("token");
-    JWT = await res.body.token;
+  // get JWT token as admin to test posting
+  let adminToken;
+  let userToken;
+  before(async () => {
+    const loginRes = await chai
+      .request(app)
+      .post("/api/v1/login")
+      .send({ email: "admin@gmail.com", password: "Password123" });
+
+    userToken = loginRes.body.token;
+
+    const adminRes = await chai
+      .request(app)
+      .post("/api/v1/adminlogin")
+      .set("Authorization", `Bearer ${userToken}`)
+      .send({
+        admin_password: "adminpassword",
+      });
+    adminToken = adminRes.body.token;
   });
 
   it("should get posts", async () => {
@@ -54,7 +47,5 @@ describe("Post tests", () => {
       .set("Authorization", `Bearer ${JWT}`)
       .send({ title: "New post", text: "This is a post" });
     expect(res).to.have.status(201);
-
-    // TODO add a route to become admin with password
   });
 });

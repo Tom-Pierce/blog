@@ -1,7 +1,5 @@
 const chai = require("chai");
 const chaiHttp = require("chai-http");
-const { MongoMemoryServer } = require("mongodb-memory-server");
-const mongoose = require("mongoose");
 const app = require("../app");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
@@ -9,20 +7,7 @@ const jwt = require("jsonwebtoken");
 chai.use(chaiHttp);
 const expect = chai.expect;
 
-let mongoServer;
 let JWT;
-mongoose.set("strictQuery", false);
-
-before(async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
-  mongoose.connect(mongoUri);
-});
-
-after(async () => {
-  await mongoose.disconnect();
-  await mongoServer.stop();
-});
 
 describe("Sign up authentication tests", () => {
   it("should create a new user", async () => {
@@ -151,7 +136,6 @@ describe("Login authentication tests", () => {
       .send({
         admin_password: "adminpassword",
       });
-    console.log(res.body);
     expect(res).to.have.status(201);
     expect(res.body.message).to.be.equal("User changed to admin");
     expect(res.body).to.have.property("token");
