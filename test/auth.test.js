@@ -132,25 +132,37 @@ describe("Login authentication tests", () => {
   });
 
   it("should send 401 if admin password is incorrect", async () => {
-    console.log(JWT);
     const res = await chai
       .request(app)
       .post("/api/v1/adminlogin")
       .set("Authorization", `Bearer ${JWT}`)
       .send({
-        password: "adminpasswor",
+        admin_password: "adminpasswor",
       });
     expect(res).to.have.status(401);
     expect(res.body.message).to.be.equal("Incorrect password");
   });
 
   it("should send 201 and an new token should be sent", async () => {
-    const res = await chai.request(app).post("/api/v1/adminlogin").send({
-      password: "adminpassword",
+    const res = await chai
+      .request(app)
+      .post("/api/v1/adminlogin")
+      .set("Authorization", `Bearer ${JWT}`)
+      .send({
+        admin_password: "adminpassword",
+      });
+    console.log(res.body);
+    expect(res).to.have.status(201);
+    expect(res.body.message).to.be.equal("User changed to admin");
+    expect(res.body).to.have.property("token");
+    const token = res.body.token;
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      expect(decoded).to.have.property("_id");
+      expect(decoded).to.have.property("username");
+      expect(decoded).to.have.property("isAdmin");
+      expect(decoded.username).to.equal("admin");
+      expect(decoded.isAdmin).to.equal(true);
+      JWT = token;
     });
-    expect(res).to.have.status(401);
-    expect(res.body.message).to.be.equal(
-      "User must be logged in to become admin"
-    );
   });
 });

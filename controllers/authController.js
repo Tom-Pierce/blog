@@ -100,7 +100,20 @@ exports.admin_log_in = async (req, res, next) => {
   if (req.user !== undefined) {
     if (req.body.admin_password === process.env.ADMIN_PASSWORD) {
       await User.findByIdAndUpdate(req.user.id, { isAdmin: true }).exec();
-      return res.status(201).json({ message: "User changed to admin" });
+      jwt.sign(
+        {
+          username: req.user.username,
+          isAdmin: true,
+          _id: req.user._id,
+        },
+        process.env.JWT_SECRET,
+        (err, token) => {
+          return res
+            .status(201)
+            .json({ token, message: "User changed to admin" });
+        }
+      );
+      return res.status(500);
     }
     return res.status(401).json({ message: "Incorrect password" });
   }
