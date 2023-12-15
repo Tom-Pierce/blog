@@ -100,4 +100,64 @@ describe("Post tests", () => {
     expect(res.body).to.haveOwnProperty("text").equal("This is a post");
     expect(res.body).to.haveOwnProperty("comments");
   });
+
+  it.skip("should not allow non admin to delete post", async () => {
+    const res = await chai
+      .request(app)
+      .delete(`/api/v1/posts/${postId}`)
+      .set("Authorization", `Bearer ${userToken}`);
+    expect(res).to.have.status(401);
+    expect(res.body.message).to.equal("Must be admin to delete posts");
+  });
+
+  it.skip("should respond with 204 if admin deletes posts", async () => {
+    const res = await chai
+      .request(app)
+      .delete(`/api/v1/posts/${postId}`)
+      .set("Authorization", `Bearer ${adminToken}`);
+    expect(res).to.have.status(204);
+    expect(res.body.message).to.equal("Post succesfully deleted");
+  });
+
+  it.skip("should not allow non admins to update posts", async () => {
+    const res = await chai
+      .request(app)
+      .put(`/api/v1/posts/${postId}`)
+      .set("Authorization", `Bearer ${userToken}`)
+      .send({
+        title: "Updated Post Title",
+        text: "This is an updated post",
+        published: false,
+      });
+    expect(res).to.have.status(401);
+    expect(res.body.message).to.equal("Must be admin to update posts");
+  });
+
+  it.skip("should respond with 404 if admin updates post that does not exist", async () => {
+    const res = await chai
+      .request(app)
+      .put(`/api/v1/posts/fakeId`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        title: "Updated Post Title",
+        text: "This is an updated post",
+        published: false,
+      });
+    expect(res).to.have.status(404);
+    expect(res.body.message).to.equal("Post not found");
+  });
+
+  it.skip("should respond with 204 if admin updates post", async () => {
+    const res = await chai
+      .request(app)
+      .put(`/api/v1/posts/${postId}`)
+      .set("Authorization", `Bearer ${adminToken}`)
+      .send({
+        title: "Updated Post Title",
+        text: "This is an updated post",
+        published: false,
+      });
+    expect(res).to.have.status(204);
+    expect(res.body.message).to.equal("Post succesfully deleted");
+  });
 });

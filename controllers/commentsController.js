@@ -10,7 +10,7 @@ exports.comments_get = async (req, res, bnext) => {
         populate: { path: "author", select: "username" },
       })
       .exec();
-    res.json(post.comments);
+    res.status(200).json(post.comments);
   } catch (error) {
     return next(error);
   }
@@ -39,7 +39,7 @@ exports.comments_post = [
           { _id: req.params.id },
           { $push: { comments: comment } }
         );
-        res.status(200).json({ message: "Comment created" });
+        res.status(201).json({ message: "Comment created" });
       } catch (error) {
         return next(error);
       }
