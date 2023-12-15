@@ -97,12 +97,10 @@ describe("Login authentication tests", () => {
     expect(res.body).to.have.an("object").with.property("token");
     const token = res.body.token;
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      expect(decoded.user).to.have.property("_id");
-      expect(decoded.user).to.have.property("username");
-      expect(decoded.user).to.have.property("password");
-      expect(decoded.user).to.have.property("email");
-      expect(decoded.user.username).to.equal("admin");
-      expect(decoded.user.email).to.equal("admin@gmail.com");
+      expect(decoded).to.have.property("_id");
+      expect(decoded).to.have.property("username");
+      expect(decoded).to.have.property("isAdmin");
+      expect(decoded.username).to.equal("admin");
       JWT = token;
     });
   });
@@ -134,6 +132,7 @@ describe("Login authentication tests", () => {
   });
 
   it("should send 401 if admin password is incorrect", async () => {
+    console.log(JWT);
     const res = await chai
       .request(app)
       .post("/api/v1/adminlogin")
@@ -143,5 +142,15 @@ describe("Login authentication tests", () => {
       });
     expect(res).to.have.status(401);
     expect(res.body.message).to.be.equal("Incorrect password");
+  });
+
+  it("should send 201 and an new token should be sent", async () => {
+    const res = await chai.request(app).post("/api/v1/adminlogin").send({
+      password: "adminpassword",
+    });
+    expect(res).to.have.status(401);
+    expect(res.body.message).to.be.equal(
+      "User must be logged in to become admin"
+    );
   });
 });

@@ -80,9 +80,19 @@ exports.log_in = [
     session: false,
   }),
   async (req, res, next) => {
-    jwt.sign({ user: req.user }, process.env.JWT_SECRET, (err, token) => {
-      res.json({ token });
-    });
+    jwt.sign(
+      {
+        // It would be more secure to check if the user is admin by querying the database, however to
+        // to reduce the number of queries we will pass it through the JWT
+        username: req.user.username,
+        isAdmin: req.user.isAdmin,
+        _id: req.user._id,
+      },
+      process.env.JWT_SECRET,
+      (err, token) => {
+        res.json({ token });
+      }
+    );
   },
 ];
 

@@ -33,6 +33,7 @@ describe("Post tests", () => {
     expect(res.body).to.have.an("object").with.property("token");
     JWT = await res.body.token;
   });
+
   it("should get posts", async () => {
     const res = await chai.request(app).get("/api/v1/posts");
     expect(res).to.have.status(200);
