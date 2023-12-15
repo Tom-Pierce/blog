@@ -84,16 +84,16 @@ describe("Comments tests", () => {
     commentId = res.body[0]._id;
   });
 
-  it.skip("should get comment with specific id", async () => {
+  it("should get comment with specific id", async () => {
     const res = await chai
       .request(app)
       .get(`/api/v1/posts/${postId}/comments/${commentId}`);
     expect(res).to.have.status(200);
     expect(res.body).to.have.an("object");
-    expect(res.body.comment._id).to.equal(commentId);
+    expect(res.body._id).to.equal(commentId);
   });
 
-  it.skip("should not allow non admin to delete comment", async () => {
+  it("should not allow non admin to delete comment", async () => {
     const res = await chai
       .request(app)
       .delete(`/api/v1/posts/${postId}/comments/${commentId}`)
@@ -102,12 +102,11 @@ describe("Comments tests", () => {
     expect(res.body.message).to.equal("Must be admin to delete comments");
   });
 
-  it.skip("should respond with 204 if admin deletes comment", async () => {
+  it("should respond with 204 if admin deletes comment", async () => {
     const res = await chai
       .request(app)
       .delete(`/api/v1/posts/${postId}/comments/${commentId}`)
       .set("Authorization", `Bearer ${adminToken}`);
     expect(res).to.have.status(204);
-    expect(res.body.message).to.equal("Comment succesfully deleted");
   });
 });
