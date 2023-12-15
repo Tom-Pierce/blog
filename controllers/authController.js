@@ -85,3 +85,16 @@ exports.log_in = [
     });
   },
 ];
+
+exports.admin_log_in = async (req, res, next) => {
+  if (req.user !== undefined) {
+    if (req.body.admin_password === process.env.ADMIN_PASSWORD) {
+      await User.findByIdAndUpdate(req.user.id, { isAdmin: true }).exec();
+      return res.status(201).json({ message: "User changed to admin" });
+    }
+    return res.status(401).json({ message: "Incorrect password" });
+  }
+  return res
+    .status(401)
+    .json({ message: "User must be logged in to become admin" });
+};

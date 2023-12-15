@@ -16,8 +16,10 @@ exports.comments_post = [
   body("text", "Comment cannot be empty").trim().isLength({ min: 1 }).escape(),
 
   async (req, res, next) => {
-    if (req.user.guest) {
-      return res.status(403).json({ message: "Guests cannnot comment" });
+    if (req.user === undefined) {
+      return res
+        .status(403)
+        .json({ message: "You must be logged in to comment" });
     }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

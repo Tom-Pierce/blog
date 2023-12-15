@@ -50,7 +50,7 @@ describe("Post tests", () => {
     const res = await chai
       .request(app)
       .post("/api/v1/posts")
-      .set("Authorization", JWT)
+      .set("Authorization", `Bearer ${JWT}`)
       .send({ title: "New post", text: "This is a post" });
     expect(res).to.have.status(201);
 

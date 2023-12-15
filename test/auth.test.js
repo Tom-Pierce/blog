@@ -10,6 +10,7 @@ chai.use(chaiHttp);
 const expect = chai.expect;
 
 let mongoServer;
+let JWT;
 mongoose.set("strictQuery", false);
 
 before(async () => {
@@ -102,6 +103,7 @@ describe("Login authentication tests", () => {
       expect(decoded.user).to.have.property("email");
       expect(decoded.user.username).to.equal("admin");
       expect(decoded.user.email).to.equal("admin@gmail.com");
+      JWT = token;
     });
   });
 
@@ -112,11 +114,34 @@ describe("Login authentication tests", () => {
     });
     expect(res).to.have.status(401);
   });
+
   it("should send 401 if email is incorrect", async () => {
     const res = await chai.request(app).post("/api/v1/login").send({
       email: "admin1@gmail.com",
       password: "Password123",
     });
     expect(res).to.have.status(401);
+  });
+
+  it("should send 401 if user is not logged in while trying to become admin", async () => {
+    const res = await chai.request(app).post("/api/v1/adminlogin").send({
+      password: "adminpassword",
+    });
+    expect(res).to.have.status(401);
+    expect(res.body.message).to.be.equal(
+      "User must be logged in to become admin"
+    );
+  });
+
+  it("should send 401 if admin password is incorrect", async () => {
+    const res = await chai
+      .request(app)
+      .post("/api/v1/adminlogin")
+      .set("Authorization", `Bearer ${JWT}`)
+      .send({
+        password: "adminpasswor",
+      });
+    expect(res).to.have.status(401);
+    expect(res.body.message).to.be.equal("Incorrect password");
   });
 });

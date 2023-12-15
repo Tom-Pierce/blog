@@ -5,7 +5,6 @@ require("dotenv").config();
 const verifyToken = (req, res, next) => {
   const bearerHeader = req.headers.authorization;
   if (!bearerHeader) {
-    req.user = { guest: true };
     return next();
   }
   const token = bearerHeader.split(" ")[1];
