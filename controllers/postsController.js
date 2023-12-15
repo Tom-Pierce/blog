@@ -32,7 +32,9 @@ exports.posts_post = [
 
   async (req, res, next) => {
     if (!req.user.isAdmin) {
-      return res.status(403).json({ error: "Must be admin to create a post" });
+      return res
+        .status(403)
+        .json({ message: "Must be admin to create a post" });
     }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -50,7 +52,7 @@ exports.posts_post = [
       post.save();
       return res.status(201).json({ message: "Post created" });
     } catch (error) {
-      console.log({ error });
+      return next(error);
     }
   },
 ];
