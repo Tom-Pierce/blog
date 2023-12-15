@@ -57,12 +57,16 @@ exports.posts_post = [
 
 // Get specific post
 exports.post_get = async (req, res, next) => {
-  const post = await Post.findById(req.params.id)
-    .populate("author", "username")
-    .exec();
-  if (post.isPublished) {
-    res.json(post);
-  } else {
-    res.status(404).json({ message: "Post not found" });
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate("author", "username")
+      .exec();
+    if (post.isPublished) {
+      res.json(post);
+    } else {
+      res.status(404).json({ message: "Post not found" });
+    }
+  } catch (error) {
+    return next(error);
   }
 };

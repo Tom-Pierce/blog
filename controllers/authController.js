@@ -79,7 +79,7 @@ exports.log_in = [
   passport.authenticate("local", {
     session: false,
   }),
-  async (req, res, next) => {
+  (req, res, next) => {
     jwt.sign(
       {
         // It would be more secure to check if the user is admin by querying the database, however to
@@ -97,27 +97,31 @@ exports.log_in = [
 ];
 
 exports.admin_log_in = async (req, res, next) => {
-  if (req.user !== undefined) {
-    if (req.body.admin_password === process.env.ADMIN_PASSWORD) {
-      await User.findByIdAndUpdate(req.user.id, { isAdmin: true }).exec();
-      jwt.sign(
-        {
-          username: req.user.username,
-          isAdmin: true,
-          _id: req.user._id,
-        },
-        process.env.JWT_SECRET,
-        (err, token) => {
-          return res
-            .status(201)
-            .json({ token, message: "User changed to admin" });
-        }
-      );
-      return res.status(500);
-    }
+  if (req.user === undefined) {
+    return res
+      .status(401)
+      .json({ message: "User must be logged in to become admin" });
+  }
+  if (req.body.admin_password !== process.env.ADMIN_PASSWORD) {
     return res.status(401).json({ message: "Incorrect password" });
   }
-  return res
-    .status(401)
-    .json({ message: "User must be logged in to become admin" });
+  try {
+    await User.findByIdAndUpdate(req.user.id, { isAdmin: true }).exec();
+    jwt.sign(
+      {
+        username: req.user.username,
+        isAdmin: true,
+        _id: req.user._id,
+      },
+      process.env.JWT_SECRET,
+      (err, token) => {
+        return res
+          .status(201)
+          .json({ token, message: "User changed to admin" });
+      }
+    );
+    return res.status(500);
+  } catch (error) {
+    return next(error);
+  }
 };

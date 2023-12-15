@@ -3,13 +3,17 @@ const Comment = require("../models/comment");
 const Post = require("../models/post");
 
 exports.comments_get = async (req, res, bnext) => {
-  const post = await Post.findById(req.params.id)
-    .populate({
-      path: "comments",
-      populate: { path: "author", select: "username" },
-    })
-    .exec();
-  res.json(post.comments);
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "username" },
+      })
+      .exec();
+    res.json(post.comments);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 exports.comments_post = [
@@ -25,16 +29,20 @@ exports.comments_post = [
     if (!errors.isEmpty()) {
       res.sendStatus(400).json({ errors: errors.array() });
     } else {
-      const comment = new Comment({
-        author: req.user._id,
-        text: req.body.text,
-      });
-      await comment.save();
-      await Post.updateOne(
-        { _id: req.params.id },
-        { $push: { comments: comment } }
-      );
-      res.status(200).json({ message: "Comment created" });
+      try {
+        const comment = new Comment({
+          author: req.user._id,
+          text: req.body.text,
+        });
+        await comment.save();
+        await Post.updateOne(
+          { _id: req.params.id },
+          { $push: { comments: comment } }
+        );
+        res.status(200).json({ message: "Comment created" });
+      } catch (error) {
+        return next(error);
+      }
     }
   },
 ];
