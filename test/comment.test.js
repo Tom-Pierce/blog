@@ -34,20 +34,21 @@ describe("Comments tests", () => {
       .post("/api/v1/login")
       .send({ email: "admin@gmail.com", password: "Password123" });
 
-    userToken = loginRes.body.token;
+    userToken = loginRes.header["set-cookie"][0].split(";")[0].split("=")[1];
 
     const adminRes = await chai
       .request(app)
       .post("/api/v1/adminlogin")
-      .set("Authorization", `Bearer ${userToken}`)
+      .set("Cookie", `token=${userToken}`)
       .send({
         admin_password: "adminpassword",
       });
-    adminToken = adminRes.body.token;
+    adminToken = adminRes.header["set-cookie"][0].split(";")[0].split("=")[1];
+
     await chai
       .request(app)
       .post("/api/v1/posts")
-      .set("Authorization", `Bearer ${adminToken}`)
+      .set("Cookie", `token=${adminToken}`)
       .send({ title: "New post", text: "This is a post", published: true });
 
     const postsRes = await chai.request(app).get("/api/v1/posts");
@@ -58,7 +59,7 @@ describe("Comments tests", () => {
     const res = await chai
       .request(app)
       .post(`/api/v1/posts/${postId}/comments`)
-      .set("Authorization", `Bearer ${userToken}`)
+      .set("Cookie", `token=${userToken}`)
       .send({ text: "This is a comment" });
     expect(res).to.have.status(201);
   });
@@ -106,7 +107,7 @@ describe("Comments tests", () => {
     const res = await chai
       .request(app)
       .delete(`/api/v1/posts/${postId}/comments/${commentId}`)
-      .set("Authorization", `Bearer ${adminToken}`);
+      .set("Cookie", `token=${adminToken}`);
     expect(res).to.have.status(204);
   });
 });

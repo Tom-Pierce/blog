@@ -10,9 +10,7 @@ chai.use(chaiHttp);
 const expect = chai.expect;
 
 describe("Post tests", () => {
-  // get JWT token as admin to test posting
-  let adminToken;
-  let userToken;
+  // get JWT token as admin to test postiCookieToketoken=t userToken;
   let postId;
   before(async () => {
     // clear database from previous tests
@@ -32,25 +30,25 @@ describe("Post tests", () => {
       .request(app)
       .post("/api/v1/login")
       .send({ email: "admin@gmail.com", password: "Password123" });
-
-    userToken = loginRes.body.token;
+    userToken = loginRes.header["set-cookie"][0].split(";")[0].split("=")[1];
 
     const adminRes = await chai
       .request(app)
       .post("/api/v1/adminlogin")
-      .set("Authorization", `Bearer ${userToken}`)
+      .set("Cookie", `token=${userToken}`)
       .send({
         admin_password: "adminpassword",
       });
-    adminToken = adminRes.body.token;
+    adminToken = adminRes.header["set-cookie"][0].split(";")[0].split("=")[1];
   });
 
   it("should get 201 when creating a new post", async () => {
     const res = await chai
       .request(app)
       .post("/api/v1/posts")
-      .set("Authorization", `Bearer ${adminToken}`)
+      .set("Cookie", `token=${adminToken}`)
       .send({ title: "New post", text: "This is a post", published: true });
+    console.log(res.body);
     expect(res).to.have.status(201);
     expect(res.body.message).to.equal("Post created");
   });
@@ -59,7 +57,7 @@ describe("Post tests", () => {
     const res = await chai
       .request(app)
       .post("/api/v1/posts")
-      .set("Authorization", `Bearer ${userToken}`)
+      .set("Cookie", `token=${userToken}`)
       .send({ title: "New post", text: "This is a post", published: true });
     expect(res).to.have.status(403);
     expect(res.body.message).to.equal("Must be admin to create a post");
@@ -69,7 +67,7 @@ describe("Post tests", () => {
     const res = await chai
       .request(app)
       .post("/api/v1/posts")
-      .set("Authorization", `Bearer ${adminToken}`)
+      .set("Cookie", `token=${adminToken}`)
       .send({ title: "", text: "", published: "blahblag" });
     expect(res).to.have.status(400);
     expect(res.body.errors).to.be.an("array").of.length(3);
@@ -105,7 +103,7 @@ describe("Post tests", () => {
     const res = await chai
       .request(app)
       .put(`/api/v1/posts/${postId}`)
-      .set("Authorization", `Bearer ${adminToken}`)
+      .set("Cookie", `token=${adminToken}`)
       .send({
         title: "Updated Post Title",
         text: "This is an updated post",
@@ -118,7 +116,7 @@ describe("Post tests", () => {
     const res = await chai
       .request(app)
       .delete(`/api/v1/posts/${postId}`)
-      .set("Authorization", `Bearer ${userToken}`);
+      .set("Cookie", `token=${userToken}`);
     expect(res).to.have.status(401);
     expect(res.body.message).to.equal("Must be admin to delete posts");
   });
@@ -127,7 +125,7 @@ describe("Post tests", () => {
     const res = await chai
       .request(app)
       .delete(`/api/v1/posts/${postId}`)
-      .set("Authorization", `Bearer ${adminToken}`);
+      .set("Cookie", `token=${adminToken}`);
     expect(res).to.have.status(204);
   });
 
@@ -135,7 +133,7 @@ describe("Post tests", () => {
     const res = await chai
       .request(app)
       .put(`/api/v1/posts/${postId}`)
-      .set("Authorization", `Bearer ${userToken}`)
+      .set("Cookie", `token=${userToken}`)
       .send({
         title: "Updated Post Title",
         text: "This is an updated post",
@@ -149,7 +147,7 @@ describe("Post tests", () => {
     const res = await chai
       .request(app)
       .put(`/api/v1/posts/fakeId`)
-      .set("Authorization", `Bearer ${adminToken}`)
+      .set("Cookie", `token=${adminToken}`)
       .send({
         title: "Updated Post Title",
         text: "This is an updated post",

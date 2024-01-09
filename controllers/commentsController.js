@@ -58,7 +58,7 @@ exports.comment_get = async (req, res, next) => {
 
 exports.comment_delete = async (req, res, next) => {
   try {
-    if (!req.user.isAdmin) {
+    if (!req.user || !req.user.isAdmin) {
       return res
         .status(401)
         .json({ message: "Must be admin to delete comments" });

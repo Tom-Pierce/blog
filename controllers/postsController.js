@@ -32,7 +32,7 @@ exports.posts_post = [
   body("published").trim().isBoolean().escape(),
 
   async (req, res, next) => {
-    if (!req.user.isAdmin) {
+    if (!req.user || !req.user.isAdmin) {
       return res
         .status(403)
         .json({ message: "Must be admin to create a post" });
@@ -79,7 +79,7 @@ exports.post_get = async (req, res, next) => {
 
 exports.post_delete = async (req, res, next) => {
   try {
-    if (!req.user.isAdmin) {
+    if (!req.user || !req.user.isAdmin) {
       return res.status(401).json({ message: "Must be admin to delete posts" });
     }
     const result = await Post.findByIdAndDelete(req.params.postId).exec();
@@ -111,7 +111,7 @@ exports.post_put = [
 
   async (req, res, next) => {
     try {
-      if (!req.user.isAdmin) {
+      if (!req.user || !req.user.isAdmin) {
         return res
           .status(401)
           .json({ message: "Must be admin to update posts" });

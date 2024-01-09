@@ -89,8 +89,9 @@ describe("Login authentication tests", () => {
       email: "admin@gmail.com",
       password: "Password123",
     });
-    expect(res.body).to.have.an("object").with.property("token");
-    const token = res.body.token;
+    // Extract token from cookies, not the best way as it assumes it is the first cookie but will work for testing
+    expect(res).to.have.cookie("token");
+    const token = res.header["set-cookie"][0].split(";")[0].split("=")[1];
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       expect(decoded).to.have.property("_id");
       expect(decoded).to.have.property("username");
@@ -130,7 +131,7 @@ describe("Login authentication tests", () => {
     const res = await chai
       .request(app)
       .post("/api/v1/adminlogin")
-      .set("Authorization", `Bearer ${JWT}`)
+      .set("Cookie", `token=${JWT}`)
       .send({
         admin_password: "adminpasswor",
       });
@@ -138,18 +139,19 @@ describe("Login authentication tests", () => {
     expect(res.body.message).to.be.equal("Incorrect password");
   });
 
-  it("should send 201 and an new token should be sent", async () => {
+  it("should send 201 and a new token should be sent", async () => {
     const res = await chai
       .request(app)
       .post("/api/v1/adminlogin")
-      .set("Authorization", `Bearer ${JWT}`)
+      .set("Cookie", `token=${JWT}`)
       .send({
         admin_password: "adminpassword",
       });
     expect(res).to.have.status(201);
     expect(res.body.message).to.be.equal("User changed to admin");
-    expect(res.body).to.have.property("token");
-    const token = res.body.token;
+    expect(res).to.have.cookie("token");
+
+    const token = res.header["set-cookie"][0].split(";")[0].split("=")[1];
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       expect(decoded).to.have.property("_id");
       expect(decoded).to.have.property("username");

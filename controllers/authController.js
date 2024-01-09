@@ -90,7 +90,11 @@ exports.log_in = [
       },
       process.env.JWT_SECRET,
       (err, token) => {
-        res.json({ token });
+        res.cookie("token", token, {
+          secure: true,
+          httpOnly: true,
+        });
+        return res.sendStatus(200);
       }
     );
   },
@@ -117,7 +121,11 @@ exports.admin_log_in = async (req, res, next) => {
       (err, token) => {
         return res
           .status(201)
-          .json({ token, message: "User changed to admin" });
+          .cookie("token", token, {
+            secure: true,
+            httpOnly: true,
+          })
+          .json({ message: "User changed to admin" });
       }
     );
     return res.status(500);

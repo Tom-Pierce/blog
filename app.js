@@ -4,6 +4,7 @@ const passport = require("passport");
 const bcrypt = require("bcryptjs");
 const session = require("express-session");
 const LocalStrategy = require("passport-local").Strategy;
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const apiV1Router = require("./routes/api.v1");
@@ -24,6 +25,8 @@ async function main() {
 }
 
 const app = express();
+
+app.use(cookieParser());
 
 passport.use(
   new LocalStrategy(
