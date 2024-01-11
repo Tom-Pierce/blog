@@ -48,7 +48,6 @@ describe("Post tests", () => {
       .post("/api/v1/posts")
       .set("Cookie", `token=${adminToken}`)
       .send({ title: "New post", text: "This is a post", published: true });
-    console.log(res.body);
     expect(res).to.have.status(201);
     expect(res.body.message).to.equal("Post created");
   });
