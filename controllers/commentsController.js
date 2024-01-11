@@ -2,7 +2,7 @@ const { body, validationResult } = require("express-validator");
 const Comment = require("../models/comment");
 const Post = require("../models/post");
 
-exports.comments_get = async (req, res, bnext) => {
+exports.comments_get = async (req, res, next) => {
   try {
     const post = await Post.findById(req.params.postId)
       .populate({
