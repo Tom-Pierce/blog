@@ -73,16 +73,38 @@ describe("Post tests", () => {
   });
 
   it("should get all posts", async () => {
+    for (let i = 0; i < 4; i++) {
+      await chai
+        .request(app)
+        .post("/api/v1/posts")
+        .set("Cookie", `token=${adminToken}`)
+        .send({
+          title: `New Post ${i}`,
+          text: "This is a post",
+          published: true,
+        });
+    }
+
     const res = await chai.request(app).get("/api/v1/posts");
     expect(res).to.have.status(200);
-    expect(res.body).to.be.an("array").of.length(1);
-    expect(res.body[0]).to.be.an("object");
-    expect(res.body[0]).to.haveOwnProperty("title");
-    expect(res.body[0]).to.haveOwnProperty("author");
-    expect(res.body[0]).to.haveOwnProperty("datePublished");
-    expect(res.body[0]).to.haveOwnProperty("text");
-    expect(res.body[0]).to.haveOwnProperty("comments");
+    expect(res.body).to.be.an("array").of.length(5);
+    res.body.forEach((post) => {
+      expect(post).to.be.an("object");
+      expect(post).to.haveOwnProperty("title");
+      expect(post).to.haveOwnProperty("author");
+      expect(post).to.haveOwnProperty("datePublished");
+      expect(post).to.haveOwnProperty("text");
+      expect(post).to.haveOwnProperty("comments");
+    });
     postId = res.body[0]._id;
+  });
+
+  it("should get posts from page 2 with a limit of 3", async () => {
+    const res = await chai.request(app).get(`/api/v1/posts?page=2&limit=3`);
+
+    expect(res.body).to.be.an("array").of.length(2);
+    expect(res.body[0].title).to.equal("New Post 2");
+    expect(res.body[1].title).to.equal("New Post 3");
   });
 
   it("should get a post with a specific id", async () => {

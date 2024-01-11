@@ -3,10 +3,18 @@ const Comment = require("../models/comment");
 const Post = require("../models/post");
 
 exports.comments_get = async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+
   try {
     const post = await Post.findById(req.params.postId)
       .populate({
         path: "comments",
+        options: {
+          skip: (page - 1) * limit,
+          limit: limit,
+        },
+
         populate: { path: "author", select: "username" },
       })
       .exec();

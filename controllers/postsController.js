@@ -4,12 +4,18 @@ const mongoose = require("mongoose");
 
 // Get posts
 exports.posts_get = async (req, res, next) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+
+  let query = { isPublished: true };
+  if (req.user && req.user.isAdmin) query = {};
   try {
-    const posts = await Post.find({ isPublished: true }, "-isPublished")
-      .sort({ datePublished: -1 })
+    const paginatedPosts = await Post.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
       .populate("author", "username")
       .exec();
-    res.status(200).json(posts);
+    res.status(200).json(paginatedPosts);
   } catch (error) {
     res.status(200).json("No posts found");
   }

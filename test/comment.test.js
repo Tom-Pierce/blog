@@ -73,16 +73,37 @@ describe("Comments tests", () => {
   });
 
   it("should get all comments from a post", async () => {
+    for (let i = 0; i < 4; i++) {
+      await chai
+        .request(app)
+        .post(`/api/v1/posts/${postId}/comments`)
+        .set("Cookie", `token=${userToken}`)
+        .send({ text: `This is a comment ${i}` });
+    }
+
     const res = await chai.request(app).get(`/api/v1/posts/${postId}/comments`);
     expect(res).to.have.status(200);
-    expect(res.body).to.be.an("array").of.length(1);
-    expect(res.body[0]).to.be.an("object");
-    expect(res.body[0]).to.have.property("_id");
-    expect(res.body[0]).to.have.property("author");
-    expect(res.body[0]).to.have.property("text");
-    expect(res.body[0]).to.have.property("likes");
-    expect(res.body[0]).to.have.property("dateSent");
+    expect(res.body).to.be.an("array").of.length(5);
+    res.body.forEach((comment) => {
+      expect(comment).to.be.an("object");
+      expect(comment).to.have.property("_id");
+      expect(comment).to.have.property("author");
+      expect(comment).to.have.property("text");
+      expect(comment).to.have.property("likes");
+      expect(comment).to.have.property("dateSent");
+    });
     commentId = res.body[0]._id;
+  });
+
+  it("should get comments from page 2 with a limit of 3", async () => {
+    const res = await chai
+      .request(app)
+      .get(`/api/v1/posts/${postId}/comments?page=2&limit=3`);
+
+    console.log(res.body);
+    expect(res.body).to.be.an("array").of.length(2);
+    expect(res.body[0].text).to.equal("This is a comment 2");
+    expect(res.body[1].text).to.equal("This is a comment 3");
   });
 
   it("should get comment with specific id", async () => {
